@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>明朝那些事儿 · 互动人物探索</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft Yahei", system-ui, sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #f6f2ec 0%, #e8dcc8 100%);
+            color: #333;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        h1 {
+            color: #8c2318;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .subtitle {
+            color: #704c3a;
+            font-size: 1.1rem;
+        }
+        .search-box {
+            display: flex;
+            gap: 10px;
+            max-width: 500px;
+            margin: 0 auto 30px;
+        }
+        #search-input {
+            flex: 1;
+            padding: 12px 16px;
+            font-size: 16px;
+            border: 2px solid #b88660;
+            border-radius: 8px;
+            outline: none;
+            background: #fffdfa;
+        }
+        #search-input:focus {
+            border-color: #8c2318;
+            box-shadow: 0 0 8px rgba(140,35,24,0.2);
+        }
+        #search-btn {
+            padding: 12px 24px;
+            background: #8c2318;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+        #search-btn:hover {
+            background: #6b1911;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(140,35,24,0.3);
+        }
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .left-panel {
+            background: #fffdfa;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 16px rgba(140,35,24,0.1);
+            border: 1px solid #ddcdbe;
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
+        .person-info {
+            display: none;
+        }
+        .person-info.active {
+            display: block;
+        }
+        .person-name {
+            color: #8c2318;
+            font-size: 2rem;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        .person-alias {
+            color: #704c3a;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+        }
+        .person-meta {
+            background: #f0e3d6;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+            color: #555;
+        }
+        .info-section {
+            margin-bottom: 25px;
+        }
+        .info-section h3 {
+            color: #603824;
+            border-left: 4px solid #b88660;
+            padding-left: 12px;
+            margin-bottom: 12px;
+            font-size: 1.1rem;
+        }
+        .info-section p {
+            line-height: 1.8;
+            font-size: 0.95rem;
+            color: #444;
+        }
+        .relationship-info {
+            background: #fff5f0;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 8px 0;
+            font-size: 0.9rem;
+            border-left: 3px solid #d4906a;
+        }
+        .right-panel {
+            background: #fffdfa;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 16px rgba(140,35,24,0.1);
+            border: 1px solid #ddcdbe;
+        }
+        .related-people-title {
+            color: #8c2318;
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #b88660;
+            padding-bottom: 10px;
+        }
+        .people-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 15px;
+        }
+        .person-card {
+            background: linear-gradient(135deg, #f9f6f0 0%, #f0e3d6 100%);
+            border: 2px solid #b88660;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+        .person-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(140,35,24,0.2);
+            background: linear-gradient(135deg, #f0e3d6 0%, #d9c2ab 100%);
+            border-color: #8c2318;
+        }
+        .person-card.active {
+            background: linear-gradient(135deg, #8c2318 0%, #6b1911 100%);
+            color: #fff;
+            border-color: #4a0f0a;
+        }
+        .person-card-name {
+            font-weight: bold;
+            font-size: 0.95rem;
+            margin-bottom: 6px;
+        }
+        .person-card-alias {
+            font-size: 0.75rem;
+            opacity: 0.7;
+            line-height: 1.4;
+        }
+        .person-card.active .person-card-alias {
+            opacity: 0.8;
+        }
+        .emperor-section {
+            margin-top: 40px;
+            padding: 30px;
+            background: linear-gradient(135deg, #fff5f0 0%, #ffe8da 100%);
+            border-radius: 12px;
+            border: 2px solid #d4906a;
+        }
+        .emperor-title {
+            color: #8c2318;
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+            font-weight: bold;
+            text-align: center;
+        }
+        .emperor-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+        .emperor-item {
+            background: #fffdfa;
+            border: 1px solid #b88660;
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .emperor-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(140,35,24,0.15);
+        }
+        .emperor-item.active {
+            background: #fff5f0;
+            border-color: #8c2318;
+            border-left: 4px solid #8c2318;
+        }
+        .emperor-order {
+            color: #8c2318;
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+        }
+        .emperor-name {
+            font-size: 0.95rem;
+            color: #333;
+            margin-bottom: 3px;
+        }
+        .emperor-years {
+            font-size: 0.85rem;
+            color: #777;
+        }
+        .emperor-relation {
+            font-size: 0.8rem;
+            color: #b88660;
+            margin-top: 5px;
+            padding-top: 5px;
+            border-top: 1px solid #e0d0c0;
+        }
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #b88660;
+        }
+        .tab-btn {
+            padding: 10px 20px;
+            background: none;
+            border: none;
+            color: #704c3a;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            margin-bottom: -2px;
+        }
+        .tab-btn:hover {
+            color: #8c2318;
+        }
+        .tab-btn.active {
+            color: #8c2318;
+            border-bottom-color: #8c2318;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .empty-state {
+            text-align: center;
+            color: #999;
+            padding: 40px 20px;
+            font-size: 1.1rem;
+        }
+        @media (max-width: 1000px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            .left-panel {
+                position: static;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>明朝那些事儿</h1>
+            <p class="subtitle">互动人物探索 · 皇帝世系与人物关系</p>
+        </div>
+
+        <div class="search-box">
+            <input id="search-input" placeholder="搜索人物名字或别名...">
+            <button id="search-btn">搜索</button>
+        </div>
+
+        <div class="main-content">
+            <div class="left-panel">
+                <div class="empty-state" id="empty-state">
+                    点击右侧人物卡片或使用搜索框选择人物
+                </div>
+                <div class="person-info" id="person-info">
+                    <div class="person-name" id="person-name"></div>
+                    <div class="person-alias" id="person-alias"></div>
+                    <div class="person-meta" id="person-meta"></div>
+                    
+                    <div class="info-section">
+                        <h3>人物简介</h3>
+                        <p id="person-intro"></p>
+                    </div>
+                    
+                    <div class="info-section">
+                        <h3>皇帝地位</h3>
+                        <div id="person-emperor" style="display:none;">
+                            <div class="relationship-info" id="emperor-info"></div>
+                        </div>
+                        <div id="no-emperor" style="display:none; color: #999;">
+                            非皇帝身份
+                        </div>
+                    </div>
+                    
+                    <div class="info-section">
+                        <h3>相关人物关系</h3>
+                        <div id="person-relationships"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="right-panel">
+                <div class="tabs">
+                    <button class="tab-btn active" data-tab="related">相关人物</button>
+                    <button class="tab-btn" data-tab="emperors">明朝皇帝世系</button>
+                </div>
+
+                <div id="related" class="tab-content active">
+                    <div class="related-people-title" id="related-title">相关人物</div>
+                    <div class="people-grid" id="people-grid"></div>
+                </div>
+
+                <div id="emperors" class="tab-content">
+                    <div class="emperor-section">
+                        <div class="emperor-title">明朝皇帝世系 (共16位皇帝)</div>
+                        <div class="emperor-list" id="emperor-list"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 完整的明朝皇帝世系和人物数据
+        const emperors = [
+            {
+                order: 1,
+                name: "朱元璋",
+                alias: "明太祖｜洪武帝",
+                years: "1368-1398",
+                reignName: "洪武",
+                relation: "建国皇帝",
+                birthDeath: "1328-1398",
+                father: null,
+                son: ["朱标", "朱棣"],
+            },
+            {
+                order: 2,
+                name: "朱允炆",
+                alias: "建文帝",
+                years: "1398-1402",
+                reignName: "建文",
+                relation: "朱元璋之孙（朱标之子）",
+                birthDeath: "1377-？",
+                father: "朱标",
+                son: [],
+            },
+            {
+                order: 3,
+                name: "朱棣",
+                alias: "明成祖｜永乐帝",
+                years: "1402-1424",
+                reignName: "永乐",
+                relation: "朱元璋第四子（建文帝的叔父）",
+                birthDeath: "1360-1424",
+                father: "朱元璋",
+                son: ["朱高炽"],
+            },
+            {
+                order: 4,
+                name: "朱高炽",
+                alias: "明仁宗",
+                years: "1424-1425",
+                reignName: "洪熙",
+                relation: "朱棣长子",
+                birthDeath: "1378-1425",
+                father: "朱棣",
+                son: ["朱瞻基"],
+            },
+            {
+                order: 5,
+                name: "朱瞻基",
+                alias: "明宣宗",
+                years: "1425-1435",
+                reignName: "宣德",
+                relation: "朱高炽子",
+                birthDeath: "1399-1435",
+                father: "朱高炽",
+                son: ["朱祁镇"],
+            },
+            {
+                order: 6,
+                name: "朱祁镇",
+                alias: "明英宗",
+                years: "1435-1449, 1457-1464",
+                reignName: "正统/天顺",
+                relation: "朱瞻基子",
+                birthDeath: "1427-1464",
+                father: "朱瞻基",
+                son: ["朱见深"],
+            },
+            {
+                order: 7,
+                name: "朱祁钰",
+                alias: "明代宗",
+                years: "1449-1457",
+                reignName: "景泰",
+                relation: "朱祁镇之弟",
+                birthDeath: "1428-1457",
+                father: "朱瞻基",
+                son: [],
+            },
+            {
+                order: 8,
+                name: "朱见深",
+                alias: "明宪宗",
+                years: "1464-1487",
+                reignName: "成化",
+                relation: "朱祁镇子",
+                birthDeath: "1447-1487",
+                father: "朱祁镇",
+                son: ["朱佑樘"],
+            },
+            {
+                order: 9,
+                name: "朱佑樘",
+                alias: "明孝宗",
+                years: "1487-1505",
+                reignName: "弘治",
+                relation: "朱见深子",
+                birthDeath: "1470-1505",
+                father: "朱见深",
+                son: ["朱厚照"],
+            },
+            {
+                order: 10,
+                name: "朱厚照",
+                alias: "明武宗",
+                years: "1505-1521",
+                reignName: "正德",
+                relation: "朱佑樘子",
+                birthDeath: "1491-1521",
+                father: "朱佑樘",
+                son: [],
+            },
+            {
+                order: 11,
+                name: "朱厚熜",
+                alias: "���世宗｜嘉靖帝",
+                years: "1521-1567",
+                reignName: "嘉靖",
+                relation: "武宗堂弟（朱厚照之堂弟）",
+                birthDeath: "1507-1567",
+                father: "朱祐杬",
+                son: ["朱载后"],
+            },
+            {
+                order: 12,
+                name: "朱载后",
+                alias: "明穆宗",
+                years: "1567-1572",
+                reignName: "隆庆",
+                relation: "嘉靖帝长子",
+                birthDeath: "1537-1572",
+                father: "朱厚熜",
+                son: ["朱翊钧"],
+            },
+            {
+                order: 13,
+                name: "朱翊钧",
+                alias: "明神宗｜万历帝",
+                years: "1572-1620",
+                reignName: "万历",
+                relation: "穆宗之子",
+                birthDeath: "1563-1620",
+                father: "朱载后",
+                son: ["朱常洛"],
+            },
+            {
+                order: 14,
+                name: "朱常洛",
+                alias: "明光宗",
+                years: "1620",
+                reignName: "泰昌",
+                relation: "万历帝长子",
+                birthDeath: "1582-1620",
+                father: "朱翊钧",
+                son: ["朱由校"],
+            },
+            {
+                order: 15,
+                name: "朱由校",
+                alias: "明熹宗",
+                years: "1620-1627",
+                reignName: "天启",
+                relation: "光宗长子",
+                birthDeath: "1605-1627",
+                father: "朱常洛",
+                son: [],
+            },
+            {
+                order: 16,
+                name: "朱由检",
+                alias: "明思宗｜崇祯帝",
+                years: "1627-1644",
+                reignName: "崇祯",
+                relation: "熹宗之弟",
+                birthDeath: "1611-1644",
+                father: "朱常洛",
+                son: [],
+            }
+        ];
+
+        const people = [
+            {
+                name: "朱元璋",
+                alias: "明太祖｜朱重八",
+                birthDeath: "1328-1398",
+                intro: "明朝开国皇帝，布衣��身，推翻元朝统治，定都南京。设立洪武典章，严刑惩治贪腐；晚年大肆诛杀开国功臣，巩固皇权。出自《明朝那些事儿》。",
+                time: "元末-洪武朝",
+                contemporary: ["马皇后", "徐达", "常遇春", "李善长", "刘基", "胡惟庸"],
+                events: ["鄱阳湖大战", "明朝建立", "胡惟庸案", "蓝玉案", "洪武制度确立"],
+                isEmperor: true,
+                emperorData: emperors[0]
+            },
+            {
+                name: "朱棣",
+                alias: "明成祖｜永乐大帝",
+                birthDeath: "1360-1424",
+                intro: "朱元璋第四子，燕王。发动靖难之役夺取皇位；迁都北京，修建紫禁城，派郑和下西洋，编修《永乐大典》，五征蒙古。是明朝最伟大的皇帝之一。",
+                time: "洪武、永乐朝",
+                contemporary: ["建文帝朱允炆", "姚广孝", "解缙", "郑和", "朱高炽"],
+                events: ["靖难之役", "迁都北京", "郑和下西洋", "编撰永乐大典", "五征漠北"],
+                isEmperor: true,
+                emperorData: emperors[2]
+            },
+            {
+                name: "朱允炆",
+                alias: "建文帝",
+                birthDeath: "1377-？",
+                intro: "朱元璋之孙，明朝第二位皇帝，即位后大力削藩，引发朱棣靖难之役，南京城破后下落成谜。是明朝历史上最具争议的皇帝。",
+                time: "洪武、建文朝",
+                contemporary: ["朱棣", "姚广孝", "齐泰", "黄子澄"],
+                events: ["建文削藩", "靖难之役"],
+                isEmperor: true,
+                emperorData: emperors[1]
+            },
+            {
+                name: "姚广孝",
+                alias: "道衍和尚",
+                birthDeath: "1335-1418",
+                intro: "黑衣宰相，朱棣最重要谋士，鼓动燕王发动靖难之役，运筹谋划夺取天下，不慕荣华，是《明朝那些事儿》经典人物。",
+                time: "洪武、永乐朝",
+                contemporary: ["朱棣", "朱允炆", "解缙"],
+                events: ["靖难之役", "定都北京筹备"],
+                isEmperor: false
+            },
+            {
+                name: "于谦",
+                alias: "于忠肃公",
+                birthDeath: "1398-1457",
+                intro: "明代名臣。土木堡之变后，瓦剌大军兵临北京，力排众议坚守京城，打赢北京保卫战；夺门之变后被冤杀。是明代最伟大的名将之一。",
+                time: "宣德、正统、景泰朝",
+                contemporary: ["明英宗朱祁镇", "明代宗朱祁钰", "王振", "石亨"],
+                events: ["土木堡之变", "北京保卫战", "夺门之变"],
+                isEmperor: false
+            },
+            {
+                name: "朱祁镇",
+                alias: "明英宗",
+                birthDeath: "1427-1464",
+                intro: "明朝第六任皇帝，宠信宦官王振，御驾亲征导致土木堡惨败被俘；后通过夺门之变复辟，杀于谦。一生复杂多变。",
+                time: "正统、天顺朝",
+                contemporary: ["于谦", "朱祁钰", "王振", "石亨"],
+                events: ["土木堡之变", "北京保卫战", "夺门之变"],
+                isEmperor: true,
+                emperorData: emperors[5]
+            },
+            {
+                name: "王守仁",
+                alias: "王阳明",
+                birthDeath: "1472-1529",
+                intro: "明代心学集大成者，军事家。龙场悟道，提出知行合一；仅用数月平定宁王朱宸濠叛乱。阳明心学深刻影响后世千年。",
+                time: "弘治、正德朝",
+                contemporary: ["唐寅", "刘瑾", "杨廷和", "朱宸濠"],
+                events: ["龙场悟道", "宁王朱宸濠叛乱、南昌平叛"],
+                isEmperor: false
+            },
+            {
+                name: "唐寅",
+                alias: "唐伯虎",
+                birthDeath: "1470-1524",
+                intro: "明代才子，乡试解元，卷入会试舞弊案终身无法入仕，后漂泊江湖，书画名传后世。他的人生充满了遗憾和不甘。",
+                time: "弘治、正德朝",
+                contemporary: ["王守仁", "刘瑾", "祝枝山"],
+                events: ["弘治会试舞弊案"],
+                isEmperor: false
+            },
+            {
+                name: "杨廷和",
+                alias: "杨文忠",
+                birthDeath: "1459-1529",
+                intro: "正德、嘉靖初年内阁首辅。武宗驾崩后主持迎立嘉靖皇帝，大礼仪之争前期核心人物，后辞官。是大明的中流砥柱。",
+                time: "正德、嘉靖朝",
+                contemporary: ["王守仁", "朱厚照", "嘉靖帝", "张璁"],
+                events: ["大礼议之争"],
+                isEmperor: false
+            },
+            {
+                name: "朱厚熜",
+                alias: "嘉靖帝",
+                birthDeath: "1507-1567",
+                intro: "明世宗，早期勤政，后期沉迷修道，二十年不上朝，精通帝王权术；严嵩、海瑞均在其时代。是矛盾复杂的皇帝。",
+                time: "嘉靖朝",
+                contemporary: ["杨廷和", "严嵩", "徐阶", "海瑞", "戚继光"],
+                events: ["大礼议之争", "壬寅宫变", "东南抗倭"],
+                isEmperor: true,
+                emperorData: emperors[10]
+            },
+            {
+                name: "严嵩",
+                alias: "严惟中",
+                birthDeath: "1480-1565",
+                intro: "嘉靖朝内阁首辅，著名奸臣，把持朝政二十余年，其子严世蕃协助揽财，最终被徐阶扳倒。是明朝最臭名昭著的奸臣。",
+                time: "嘉靖朝",
+                contemporary: ["嘉靖帝", "徐阶", "严世蕃", "海瑞"],
+                events: ["壬寅宫变", "严党专权"],
+                isEmperor: false
+            },
+            {
+                name: "徐阶",
+                alias: "徐文贞",
+                birthDeath: "1503-1583",
+                intro: "隐忍多年，暗中积蓄力量，最终扳倒严嵩，继任内阁首辅，为后续张居正改革铺垫基础。是大明晚期最智慧的政治家。",
+                time: "嘉靖、隆庆朝",
+                contemporary: ["嘉靖帝", "严嵩", "张居正", "高拱"],
+                events: ["扳倒严党", "隆庆新政"],
+                isEmperor: false
+            },
+            {
+                name: "海瑞",
+                alias: "海青天",
+                birthDeath: "1514-1587",
+                intro: "明代著名清官，抬棺上书直言痛骂嘉靖皇帝；一生清廉，坚持原则，但施政方式争议较大。是廉政的象征。",
+                time: "嘉靖、隆庆、万历朝",
+                contemporary: ["嘉靖帝", "徐阶", "张居正", "高拱"],
+                events: ["直言上书骂嘉靖", "江南整顿田亩"],
+                isEmperor: false
+            },
+            {
+                name: "戚继光",
+                alias: "戚元敬",
+                birthDeath: "1528-1588",
+                intro: "明代抗倭名将，创立戚家军，发明鸳鸯阵，扫平东南倭寇；后北上镇守蓟门。是明朝最伟大的军事家。",
+                time: "嘉靖、隆庆、万历朝",
+                contemporary: ["张居正", "胡宗宪", "徐阶"],
+                events: ["东南抗倭", "鸳鸯阵破倭寇", "镇守蓟州"],
+                isEmperor: false
+            },
+            {
+                name: "张居正",
+                alias: "张太岳",
+                birthDeath: "1525-1582",
+                intro: "万历朝内阁首辅，明代最著名改革家，推行一条鞭法，整顿吏治财政，让大明国力短暂复兴；死后被万历清算抄家。是大明最后的希望。",
+                time: "嘉靖、隆庆、万历前期",
+                contemporary: ["徐阶", "高拱", "万历皇帝", "冯保", "海瑞", "戚继光"],
+                events: ["隆庆和议", "张居正改革、一条鞭法"],
+                isEmperor: false
+            },
+            {
+                name: "朱翊钧",
+                alias: "万历帝",
+                birthDeath: "1563-1620",
+                intro: "明神宗，十岁即位，前期依靠张居正改革；张居正死后开始长期怠政，三十年不上朝，发生万历三大征。是导致明朝衰落的关键人物。",
+                time: "万历朝",
+                contemporary: ["张居正", "冯保", "申时行", "努尔哈赤"],
+                events: ["张居正改革", "万历三大征", "萨尔浒之战前奏"],
+                isEmperor: true,
+                emperorData: emperors[12]
+            },
+            {
+                name: "努尔哈赤",
+                alias: "清太祖",
+                birthDeath: "1559-1626",
+                intro: "建州女真首领，统一女真各部，建立后金，以七大恨起兵反明，萨尔浒之战大败明军。是明朝衰落的重要推手。",
+                time: "万历、天启朝",
+                contemporary: ["万历帝", "熊廷弼", "袁崇焕"],
+                events: ["统一女真", "萨尔浒之战", "宁远之战"],
+                isEmperor: false
+            },
+            {
+                name: "袁崇焕",
+                alias: "袁元素",
+                birthDeath: "1584-1630",
+                intro: "明末辽东将领，镇守宁远，宁远大捷击败努尔哈赤；后遭崇祯猜忌，被凌迟处死，是明末极具争议人物。他的悲剧象征了明朝的末路。",
+                time: "万历、天启、崇祯朝",
+                contemporary: ["努尔哈赤", "皇太极", "崇祯帝", "孙承宗"],
+                events: ["宁远大捷", "宁锦大捷", "己巳之变"],
+                isEmperor: false
+            },
+            {
+                name: "朱由检",
+                alias: "崇祯帝",
+                birthDeath: "1611-1644",
+                intro: "明朝末代皇帝，即位铲除魏忠贤阉党；勤于政务，但多疑急躁，内有农民起义，外有后金，李自成攻破北京后煤山自缢。是悲情的亡国之君。",
+                time: "天启、崇祯朝",
+                contemporary: ["魏忠贤", "袁崇焕", "李自成", "孙传庭"],
+                events: ["铲除阉党", "李自成起义", "甲申国难，明朝灭亡"],
+                isEmperor: true,
+                emperorData: emperors[15]
+            },
+            {
+                name: "魏忠贤",
+                alias: "九千岁",
+                birthDeath: "1568-1627",
+                intro: "天启朝权宦，把持朝政，迫害东林党；崇祯登基后迅速被清算自缢。是明朝腐败的象征。",
+                time: "天启朝",
+                contemporary: ["天启帝朱由校", "崇祯帝", "东林党人"],
+                events: ["阉党专权", "迫害东林党", "崇祯清算阉党"],
+                isEmperor: false
+            },
+            {
+                name: "李自成",
+                alias: "李闯王",
+                birthDeath: "1606-1645",
+                intro: "明末农民起义领袖，提出均田免赋，率军攻破北京，崇祯自缢；随后在山海关被吴三桂与清军击败。是推翻明朝的最后一把刀。",
+                time: "崇祯朝",
+                contemporary: ["崇祯帝", "吴三桂", "多尔衮"],
+                events: ["明末农民起义", "攻破北京，明朝灭亡", "山海关一片石大战"],
+                isEmperor: false
+            },
+            {
+                name: "马皇后",
+                alias: "孝慈高皇后",
+                birthDeath: "1332-1382",
+                intro: "朱元璋原配妻子，贤德仁厚，多次保护大臣，劝阻朱元璋滥杀，是朱元璋一生最敬重之人。是明朝历史上最贤淑的皇后。",
+                time: "元末-洪武朝",
+                contemporary: ["朱元璋", "徐达", "常遇春", "李善长", "刘伯温"],
+                events: ["明朝开国", "洪武治国"],
+                isEmperor: false
+            },
+            {
+                name: "徐达",
+                alias: "徐中山",
+                birthDeath: "1332-1385",
+                intro: "朱元璋麾下最信任的将领，南征北战，战功赫赫，最终功成身退。是明朝开国名将。",
+                time: "元末-洪武朝",
+                contemporary: ["朱元璋", "常遇春", "李善长", "刘伯温"],
+                events: ["推翻元朝", "平定群雄"],
+                isEmperor: false
+            },
+            {
+                name: "常遇春",
+                alias: "常胜将军",
+                birthDeath: "1330-1369",
+                intro: "朱元璋麾下著名将领，勇猛善战，为明朝统一立下汗马功劳。是元末明初最勇敢的战士。",
+                time: "元末-洪武朝",
+                contemporary: ["朱元璋", "徐达", "李善长", "刘伯温"],
+                events: ["推翻元朝", "鄱阳湖大战"],
+                isEmperor: false
+            },
+            {
+                name: "刘基",
+                alias: "刘伯温",
+                birthDeath: "1311-1375",
+                intro: "朱元璋最信任的谋士，运筹帷幄，为明朝的建立出谋划策。后被朱元璋猜忌。是明朝最伟大的谋士。",
+                time: "元末-洪武朝",
+                contemporary: ["朱元璋", "徐达", "常遇春", "李善长"],
+                events: ["推翻元朝", "洪武制度制定"],
+                isEmperor: false
+            },
+            {
+                name: "郑和",
+                alias: "三宝太监",
+                birthDeath: "1371-1434",
+                intro: "朱棣时期最著名的宦官，七下西洋���开拓海外贸易，展示大明威力。是明朝最伟大的航海家。",
+                time: "永乐朝",
+                contemporary: ["朱棣", "朱高炽"],
+                events: ["郑和下西洋"],
+                isEmperor: false
+            }
+        ];
+
+        let currentPerson = null;
+
+        const input = document.getElementById('search-input');
+        const btn = document.getElementById('search-btn');
+        const emptyState = document.getElementById('empty-state');
+        const personInfo = document.getElementById('person-info');
+        const peopleGrid = document.getElementById('people-grid');
+        const personInfoDiv = document.getElementById('person-info');
+
+        // 标签页切换
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById(btn.dataset.tab).classList.add('active');
+                if (btn.dataset.tab === 'emperors') {
+                    renderEmperorList();
+                }
+            });
+        });
+
+        function searchPerson(name) {
+            const found = people.find(p => 
+                p.name === name || p.alias.includes(name)
+            );
+            if (found) {
+                displayPerson(found);
+            }
+        }
+
+        function displayPerson(person) {
+            currentPerson = person;
+            emptyState.style.display = 'none';
+            personInfo.style.display = 'block';
+
+            document.getElementById('person-name').textContent = person.name;
+            document.getElementById('person-alias').textContent = person.alias;
+            document.getElementById('person-meta').textContent = `${person.birthDeath} | 时代：${person.time}`;
+            document.getElementById('person-intro').textContent = person.intro;
+
+            // 处理皇帝信息
+            if (person.isEmperor) {
+                const empData = person.emperorData;
+                const emperorInfo = document.getElementById('person-emperor');
+                const noEmperor = document.getElementById('no-emperor');
+                
+                let relStr = `第${empData.order}位皇帝 | 年号：${empData.reignName} | 统治：${empData.years}`;
+                if (empData.father) {
+                    const fatherInfo = emperors.find(e => e.name === empData.father);
+                    if (fatherInfo) {
+                        relStr += ` | 父：${empData.father}`;
+                    }
+                }
+                
+                document.getElementById('emperor-info').textContent = relStr;
+                emperorInfo.style.display = 'block';
+                noEmperor.style.display = 'none';
+            } else {
+                document.getElementById('person-emperor').style.display = 'none';
+                document.getElementById('no-emperor').style.display = 'block';
+            }
+
+            // 显示相关人物关系
+            const relDiv = document.getElementById('person-relationships');
+            let relHTML = '';
+            
+            person.contemporary.forEach(contemp => {
+                relHTML += `<div class="relationship-info">同期人物：<strong>${contemp}</strong></div>`;
+            });
+            
+            relDiv.innerHTML = relHTML || '<div style="color: #999;">无相关记录</div>';
+
+            // 渲染相关人物卡片
+            renderRelatedPeople(person);
+        }
+
+        function renderRelatedPeople(person) {
+            const related = new Set([...person.contemporary]);
+            const relatedPeople = Array.from(related)
+                .map(name => people.find(p => p.name === name || p.name.includes(name)))
+                .filter(Boolean);
+
+            let html = relatedPeople.map(p => `
+                <div class="person-card ${currentPerson && currentPerson.name === p.name ? 'active' : ''}" onclick="displayPerson(people.find(x => x.name === '${p.name}'))">
+                    <div class="person-card-name">${p.name}</div>
+                    <div class="person-card-alias">${p.alias}</div>
+                </div>
+            `).join('');
+
+            peopleGrid.innerHTML = html || '<div style="grid-column: 1/-1; text-align: center; color: #999;">暂无相关人物</div>';
+            
+            // 更新标题
+            document.getElementById('related-title').textContent = `相关人物 (${relatedPeople.length}位)`;
+        }
+
+        function renderEmperorList() {
+            const emperorList = document.getElementById('emperor-list');
+            let html = emperors.map(emp => {
+                let relationText = emp.relation;
+                if (emp.father && emp.father !== 'null') {
+                    relationText += ` (父: ${emp.father})`;
+                }
+                return `
+                    <div class="emperor-item ${currentPerson && currentPerson.isEmperor && currentPerson.name === emp.name ? 'active' : ''}" 
+                         onclick="searchPerson('${emp.name}')">
+                        <div class="emperor-order">第${emp.order}位</div>
+                        <div class="emperor-name">${emp.name} (${emp.alias})</div>
+                        <div class="emperor-years">${emp.years}</div>
+                        <div class="emperor-relation">${relationText}</div>
+                    </div>
+                `;
+            }).join('');
+
+            emperorList.innerHTML = html;
+        }
+
+        // 搜索功能
+        function handleSearch() {
+            const keyword = input.value.trim();
+            if (!keyword) return;
+
+            const found = people.find(p => 
+                p.name.includes(keyword) || p.alias.includes(keyword)
+            );
+
+            if (found) {
+                displayPerson(found);
+            } else {
+                emptyState.style.display = 'block';
+                personInfo.style.display = 'none';
+                peopleGrid.innerHTML = '<div style="text-align: center; color: #999; grid-column: 1/-1;">未找到相关人物</div>';
+            }
+        }
+
+        btn.addEventListener('click', handleSearch);
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') handleSearch();
+        });
+
+        // 初始化：显示所有人物
+        window.addEventListener('load', () => {
+            const allPeople = people.slice(0, 6);
+            let html = allPeople.map(p => `
+                <div class="person-card" onclick="displayPerson(people.find(x => x.name === '${p.name}'))">
+                    <div class="person-card-name">${p.name}</div>
+                    <div class="person-card-alias">${p.alias}</div>
+                </div>
+            `).join('');
+            peopleGrid.innerHTML = html;
+            document.getElementById('related-title').textContent = '明朝主要人物';
+        });
+
+        // 全局访问
+        window.displayPerson = displayPerson;
+        window.searchPerson = searchPerson;
+        window.people = people;
+    </script>
+</body>
+</html>
