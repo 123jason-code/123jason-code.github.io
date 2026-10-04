@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>明朝那些事儿 · 人物知识检索</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft Yahei", system-ui, sans-serif;
+        }
+        body {
+            background-color: #f6f2ec;
+            color: #333;
+            padding: 30px 16px;
+            max-width: 1020px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 36px;
+        }
+        h1 {
+            color: #8c2318;
+            margin-bottom: 10px;
+            font-size: 2.2rem;
+        }
+        .subtitle {
+            color: #704c3a;
+            font-size: 1rem;
+        }
+        .search-box {
+            display: flex;
+            gap: 10px;
+            max-width: 640px;
+            margin: 0 auto 32px;
+        }
+        #search-input {
+            flex: 1;
+            padding: 14px 18px;
+            font-size: 17px;
+            border: 2px solid #b88660;
+            border-radius: 10px;
+            outline: none;
+            background: #fffdfa;
+        }
+        #search-input:focus {
+            border-color: #8c2318;
+        }
+        #search-btn {
+            padding: 14px 26px;
+            background: #8c2318;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 17px;
+            transition: background 0.25s;
+        }
+        #search-btn:hover {
+            background: #6b1911;
+        }
+        .result-card {
+            background: #fffdfa;
+            border: 1px solid #ddcdbe;
+            border-radius: 14px;
+            padding: 28px;
+            display: none;
+            box-shadow: 0 4px 12px rgba(140,35,24,0.08);
+        }
+        .result-card h2 {
+            color: #8c2318;
+            margin-bottom: 8px;
+            font-size:1.6rem;
+        }
+        .meta {
+            color: #777;
+            margin-bottom: 20px;
+            font-size:0.98rem;
+        }
+        .section {
+            margin: 22px 0;
+        }
+        .section h3 {
+            margin-bottom: 10px;
+            color: #603824;
+            border-left: 5px solid #b88660;
+            padding-left: 10px;
+            font-size:1.2rem;
+        }
+        .tag-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .tag {
+            background: #f0e3d6;
+            padding: 7px 14px;
+            border-radius: 22px;
+            font-size: 14.5px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .tag:hover {
+            background: #d9c2ab;
+        }
+        .intro-text {
+            line-height:1.7;
+            font-size:1rem;
+        }
+        .tip {
+            text-align:center;
+            color:#888;
+            margin-top:24px;
+        }
+        .empty-tip{
+            text-align:center;
+            color:#8c2318;
+            padding:20px;
+            display:none;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>明朝那些事儿 · 人物知识检索</h1>
+        <p class="subtitle">搜索明朝人物，查看同期人物与时代重大事件</p>
+    </div>
+
+    <div class="search-box">
+        <input id="search-input" placeholder="输入人物：朱元璋、王守仁、于谦、张居正、袁崇焕">
+        <button id="search-btn">查询</button>
+    </div>
+
+    <div class="empty-tip" id="emptyTip">未检索到此人物，请检查名字</div>
+
+    <div class="result-card" id="result">
+        <h2 id="person-name"></h2>
+        <div class="meta" id="person-meta"></div>
+        <div class="section">
+            <h3>人物简介</h3>
+            <p class="intro-text" id="person-intro"></p>
+        </div>
+        <div class="section">
+            <h3>同期人物（点击名字直接查询）</h3>
+            <div class="tag-list" id="person-contemp"></div>
+        </div>
+        <div class="section">
+            <h3>时代重大事件</h3>
+            <div class="tag-list" id="person-events"></div>
+        </div>
+    </div>
+
+    <div class="tip">数据参考《明朝那些事儿》全书，可自行在代码内继续新增人物</div>
+
+<script>
+// 明朝那些事儿 核心人物库
+const data = [
+    {
+        name:"朱元璋",
+        alias:"明太祖｜朱重八",
+        birthDeath:"1328—1398",
+        intro:"明朝开国皇帝，布衣出身，推翻元朝统治，定都南京。设立洪武典章，严刑惩治贪腐；晚年大肆诛杀开国功臣，巩固皇权。出自《明朝那些事儿》第一部。",
+        time:"元末-洪武朝",
+        contemporary:["马皇后","徐达","常遇春","李善长","刘基(刘伯温)","胡惟庸"],
+        events:["鄱阳湖大战","明朝建立","胡惟庸案","蓝玉案","洪武制度确立"]
+    },
+    {
+        name:"马皇后",
+        alias:"孝慈高皇后",
+        birthDeath:"1332—1382",
+        intro:"朱元璋原配妻子，贤德仁厚，多次保护大臣，劝阻朱元璋滥杀，是朱元璋一生最敬重之人。《明朝那些事儿》第一部。",
+        time:"元末-洪武朝",
+        contemporary:["朱元璋","徐达","常遇春","李善长","刘伯温"],
+        events:["明朝开国","洪武治国"]
+    },
+    {
+        name:"朱棣",
+        alias:"明成祖｜永乐大帝",
+        birthDeath:"1360—1424",
+        intro:"朱元璋第四子，燕王。发动靖难之役夺取皇位；迁都北京，修建紫禁城，派郑和下西洋，编修《永乐大典》，五征蒙古。《明朝那些事儿》第二部。",
+        time:"洪武、永乐朝",
+        contemporary:["建文帝朱允炆","姚广孝","解缙","郑和"],
+        events:["靖难之役","迁都北京","郑和下西洋","编撰永乐大典","五征漠北"]
+    },
+    {
+        name:"姚广孝",
+        alias:"道衍和尚",
+        birthDeath:"1335—1418",
+        intro:"黑衣宰相，朱棣最重要谋士，鼓动燕王发动靖难之役，运筹谋划夺取天下，不慕荣华，是《明朝那些事儿》经典人物。",
+        time:"洪武、永乐朝",
+        contemporary:["朱棣","朱允炆","解缙"],
+        events:["靖难之役","定都北京筹备"]
+    },
+    {
+        name:"朱允炆",
+        alias:"建文帝",
+        birthDeath:"1377—？",
+        intro:"朱元璋之孙，明朝第二位皇帝，即位后大力削藩，引发朱棣靖难之役，南京城破后下落成谜。《明朝那些事儿》第二部。",
+        time:"洪武、建文朝",
+        contemporary:["朱棣","姚广孝","齐泰","黄子澄"],
+        events:["建文削藩","靖难之役"]
+    },
+    {
+        name:"于谦",
+        alias:"于忠肃公",
+        birthDeath:"1398—1457",
+        intro:"明代名臣。土木堡之变后，瓦剌大军兵临北京，力排众议坚守京城，打赢北京保卫战；夺门之变后被冤杀。《明朝那些事儿》第三部。",
+        time:"宣德、正统、景泰朝",
+        contemporary:["明英宗朱祁镇","明代宗朱祁钰","王振","石亨"],
+        events:["土木堡之变","北京保卫战","夺门之变"]
+    },
+    {
+        name:"朱祁镇",
+        alias:"明英宗",
+        birthDeath:"1427—1464",
+        intro:"明朝第六任皇帝，宠信宦官王振，御驾亲征导致土木堡惨败被俘；后通过夺门之变复辟，杀于谦。《明朝那些事儿》第三部。",
+        time:"正统、天顺朝",
+        contemporary:["于谦","朱祁钰","王振","石亨"],
+        events:["土木堡之变","北京保卫战","夺门之变"]
+    },
+    {
+        name:"王守仁",
+        alias:"王阳明",
+        birthDeath:"1472—1529",
+        intro:"明代心学集大成者，军事家。龙场悟道，提出知行合一；仅用数月平定宁王朱宸濠叛乱。阳明心学深刻影响后世。《明朝那些事儿》第三部。",
+        time:"弘治、正德朝",
+        contemporary:["唐寅","刘瑾","杨廷和","朱宸濠"],
+        events:["龙场悟道","宁王朱宸濠叛乱、南昌平叛"]
+    },
+    {
+        name:"唐寅",
+        alias:"唐伯虎",
+        birthDeath:"1470—1524",
+        intro:"明代才子，乡试解元，卷入会试舞弊案终身无法入仕，后漂泊江湖，书画名传后世。《明朝那些事儿》第三部。",
+        time:"弘治、正德朝",
+        contemporary:["王守仁","刘瑾","祝枝山"],
+        events:["弘治会试舞弊案"]
+    },
+    {
+        name:"杨廷和",
+        alias:"杨文忠",
+        birthDeath:"1459—1529",
+        intro:"正德、嘉靖初年内阁首辅。武宗驾崩后主持迎立嘉靖皇帝，大礼仪之争前期核心人物，后辞官。《明朝那些事儿》第四部。",
+        time:"正德、嘉靖朝",
+        contemporary:["王守仁","朱厚照","嘉靖帝","张璁"],
+        events:["大礼议之争"]
+    },
+    {
+        name:"朱厚熜",
+        alias:"嘉靖帝",
+        birthDeath:"1507—1567",
+        intro:"明世宗，早期勤政，后期沉迷修道，二十年不上朝，精通帝王权术；严嵩、海瑞均在其时代。《明朝那些事儿》第四部。",
+        time:"嘉靖朝",
+        contemporary:["杨廷和","严嵩","徐阶","海瑞","戚继光"],
+        events:["大礼议之争","壬寅宫变","东南抗倭"]
+    },
+    {
+        name:"严嵩",
+        alias:"严惟中",
+        birthDeath:"1480—1565",
+        intro:"嘉靖朝内阁首辅，著名奸臣，把持朝政二十余年，其子严世蕃协助揽财，最终被徐阶扳倒。《明朝那些事儿》第四部。",
+        time:"嘉靖朝",
+        contemporary:["嘉靖帝","徐阶","严世蕃","海瑞"],
+        events:["壬寅宫变","严党专权"]
+    },
+    {
+        name:"徐阶",
+        alias:"徐文贞",
+        birthDeath:"1503—1583",
+        intro:"隐忍多年，暗中积蓄力量，最终扳倒严嵩，继任内阁首辅，为后续张居正改革铺垫基础。《明朝那些事儿》第四部。",
+        time:"嘉靖、隆庆朝",
+        contemporary:["嘉靖帝","严嵩","张居正","高拱"],
+        events:["扳倒严党","隆庆新政"]
+    },
+    {
+        name:"高拱",
+        alias:"高文襄",
+        birthDeath:"1513—1578",
+        intro:"隆庆朝首辅，性格强势，改革吏治，促成隆庆和议；与张居正、冯保斗争，最终被罢官。《明朝那些事儿》第五部。",
+        time:"嘉靖、隆庆朝",
+        contemporary:["徐阶","张居正","冯保","海瑞"],
+        events:["隆庆和议"]
+    },
+    {
+        name:"海瑞",
+        alias:"海青天",
+        birthDeath:"1514—1587",
+        intro:"明代著名清官，抬棺上书直言痛骂嘉靖皇帝；一生清廉，坚持原则，但施政方式争议较大。《明朝那些事儿》第四、五部。",
+        time:"嘉靖、隆庆、万历朝",
+        contemporary:["嘉靖帝","徐阶","张居正","高拱"],
+        events:["直言上书骂嘉靖","江南整顿田亩"]
+    },
+    {
+        name:"戚继光",
+        alias:"戚元敬",
+        birthDeath:"1528—1588",
+        intro:"明代抗倭名将，创立戚家军，发明鸳鸯阵，扫平东南倭寇；后北上镇守蓟门。《明朝那些事儿》第四、五部。",
+        time:"嘉靖、隆庆、万历朝",
+        contemporary:["张居正","胡宗宪","徐阶"],
+        events:["东南抗倭","鸳鸯阵破倭寇","镇守蓟州"]
+    },
+    {
+        name:"张居正",
+        alias:"张太岳",
+        birthDeath:"1525—1582",
+        intro:"万历朝内阁首辅，明代最著名改革家，推行一条鞭法，整顿吏治财政，让大明国力短暂复兴；死后被万历清算抄家。《明朝那些事儿》第五部。",
+        time:"嘉靖、隆庆、万历前期",
+        contemporary:["徐阶","高拱","万历皇帝","冯保","海瑞","戚继光"],
+        events:["隆庆和议","张居正改革、一条鞭法"]
+    },
+    {
+        name:"朱翊钧",
+        alias:"万历帝",
+        birthDeath:"1563—1620",
+        intro:"明神宗，十岁即位，前期依靠张居正改革；张居正死后开始长期怠政，三十年不上朝，发生万历三大征。《明朝那些事儿》第五、六部。",
+        time:"万历朝",
+        contemporary:["张居正","冯保","申时行","努尔哈赤"],
+        events:["张居正改革","万历三大征","萨尔浒之战前奏"]
+    },
+    {
+        name:"申时行",
+        alias:"申文定",
+        birthDeath:"1535—1614",
+        intro:"万历年间内阁首辅，擅长调和君臣矛盾，在万历立储之争中左右周旋。《明朝那些事儿》第六部。",
+        time:"万历朝",
+        contemporary:["万历帝","王锡爵","顾宪成"],
+        events:["国本之争"]
+    },
+    {
+        name:"努尔哈赤",
+        alias:"清太祖",
+        birthDeath:"1559—1626",
+        intro:"建州女真首领，统一女真各部，建立后金，以七大恨起兵反明，萨尔浒之战大败明军。《明朝那些事儿》第六、七部。",
+        time:"万历、天启朝",
+        contemporary:["万历帝","熊廷弼","袁崇焕"],
+        events:["统一女真","萨尔浒之战","宁远之战"]
+    },
+    {
+        name:"袁崇焕",
+        alias:"袁元素",
+        birthDeath:"1584—1630",
+        intro:"明末辽东将领，镇守宁远，宁远大捷击败努尔哈赤；后遭崇祯猜忌，被凌迟处死，是明末极具争议人物。《明朝那些事儿》第七部。",
+        time:"万历、天启、崇祯朝",
+        contemporary:["努尔哈赤","皇太极","崇祯帝","孙承宗"],
+        events:["宁远大捷","宁锦大捷","己巳之变"]
+    },
+    {
+        name:"朱由检",
+        alias:"崇祯帝",
+        birthDeath:"1611—1644",
+        intro:"明朝末代皇帝，即位铲除魏忠贤阉党；勤于政务，但多疑急躁，内有农民起义，外有后金，李自成攻破北京后煤山自缢。《明朝那些事儿》第七部。",
+        time:"天启、崇祯朝",
+        contemporary:["魏忠贤","袁崇焕","李自成","孙传庭"],
+        events:["铲除阉党","李自成起义","甲申国难，明朝灭亡"]
+    },
+    {
+        name:"魏忠贤",
+        alias:"九千岁",
+        birthDeath:"1568—1627",
+        intro:"天启朝权宦，把持朝政，迫害东林党；崇祯登基后迅速被清算自缢。《明朝那些事儿》第七部。",
+        time:"天启朝",
+        contemporary:["天启帝朱由校","崇祯帝","东林党人"],
+        events:["阉党专权","迫害东林党","崇祯清算阉党"]
+    },
+    {
+        name:"李自成",
+        alias:"李闯王",
+        birthDeath:"1606—1645",
+        intro:"明末农民起义领袖，提出均田免赋，率军攻破北京，崇祯自缢；随后在山海关被吴三桂与清军击败。《明朝那些事儿》第七部。",
+        time:"崇祯朝",
+        contemporary:["崇祯帝","吴三桂","多尔衮"],
+        events:["明末农民起义","攻破北京，明朝灭亡","山海关一片石大战"]
+    }
+]
+
+const input = document.getElementById('search-input')
+const btn = document.getElementById('search-btn')
+const resultDom = document.getElementById('result')
+const emptyTip = document.getElementById('emptyTip')
+
+function searchPerson(keyword) {
+    keyword = keyword.trim()
+    if(!keyword) return;
+    const find = data.find(item=>
+        item.name.includes(keyword) || item.alias.includes(keyword)
+    )
+    if(!find){
+        resultDom.style.display = "none"
+        emptyTip.style.display = "block"
+        return
+    }
+    emptyTip.style.display = "none"
+    document.getElementById("person-name").innerText = find.name + "（"+find.alias+"）"
+    document.getElementById("person-meta").innerText = `${find.birthDeath}｜时代：${find.time}`
+    document.getElementById("person-intro").innerText = find.intro
+
+    // 同期人物，点击标签自动搜索
+    const contempWrap = document.getElementById("person-contemp")
+    contempWrap.innerHTML = find.contemporary.map(name=>{
+        return `<span class="tag" onclick="searchPerson('${name.split('(')[0]}')">${name}</span>`
+    }).join('')
+
+    // 事件标签（不可点击）
+    const eventWrap = document.getElementById("person-events")
+    eventWrap.innerHTML = find.events.map(x=>`<span class="tag">${x}</span>`).join('')
+
+    resultDom.style.display = "block"
+}
+
+btn.onclick = ()=> searchPerson(input.value)
+input.onkeydown = (e)=>{
+    if(e.key === 'Enter') searchPerson(input.value)
+}
+</script>
+</body>
+</html>
